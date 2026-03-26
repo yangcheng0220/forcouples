@@ -49,11 +49,9 @@ Each partner only sees their own personal expenses plus all shared expenses. You
 ## How It Works
 
 ```
-User: "coffee at 7-11"
+User: "grabbed lunch, $12"
   → Tool parses: description, infers category (Food), date (today), type (personal), payer (me)
-  → Tool: "Logging: coffee at 7-11 → Food | Amount? | personal | 2026-03-25"
-  → User: "85"
-  → Tool: "Logging: coffee at 7-11 → Food | $85 | personal | 2026-03-25. Confirm?"
+  → Tool: "Logging: grabbed lunch → Food | $12.00 | personal | 2026-03-25. Confirm?"
   → User: "y"
   → Tool: INSERT INTO expenses → done
 

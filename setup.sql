@@ -153,7 +153,20 @@ CREATE POLICY "Delete relevant expenses" ON expenses
   );
 
 -- Realtime (optional — for the PWA frontend)
-ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
-ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'expenses'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'categories'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+  END IF;
+END $$;
 
 SELECT 'Setup complete!' AS status;

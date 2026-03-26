@@ -10,7 +10,7 @@ argument-hint: "[log|query] or natural language"
 Track shared and personal expenses between partners using Supabase.
 
 Each expense has:
-- **type** — `personal` (only visible to the person who logged it) or `shared` (visible to both partners)
+- **type** — `personal` (only visible to the person who created it) or `shared` (visible to both partners)
 - **description** — what was bought
 - **amount** — how much (can be null if unknown)
 - **category** — matched from history or the categories table
