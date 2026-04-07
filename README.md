@@ -4,6 +4,8 @@ A couples expense tracker where the AI coding tool is the interface. No app need
 
 Built on Supabase (Postgres) with zero backend code. The system design is the product — schema, access rules, and a skill layer that teaches any AI coding tool how to use it.
 
+**Full writeup:** [ForCouples — When the Agent Replaced the App](https://yangchengchen.com/projects/forcouples)
+
 ## Getting Started
 
 ```
