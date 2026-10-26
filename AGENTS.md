@@ -1,6 +1,6 @@
 # ForCouples
 
-Couples expense tracking powered by AI coding tools and Supabase. Natural language in, structured financial data out.
+An experiment in agent-driven expense tracking using a schema, a skill file, and Supabase MCP.
 
 ## What This Is
 
@@ -11,14 +11,14 @@ No custom backend. The system design is the product.
 ## Data Model
 
 Each expense has:
-- **type** — `personal` (visible only to the person who created it) or `shared` (visible to both partners)
+- **type** — `personal` or `shared` (intended visibility labels, not MCP access controls)
 - **description** — what was bought
 - **amount** — how much (nullable)
 - **category** — matched from history or the categories table (e.g. Food, Transport, Entertainment)
 - **payer** — who paid out of pocket (can differ from who logged it)
 - **date** — when it happened
 
-**Visibility rule:** each partner sees their own personal expenses + all shared expenses. A partner's personal expenses are never exposed. This is enforced by RLS policies and skill query patterns.
+**Intended visibility:** own personal expenses and shared expenses from the configured pair. Developer MCP SQL can bypass RLS; skill filters and config are editable instructions, not authorization. Do not promise partner privacy or present this as a secure multi-user template. Categories are global: the authenticated policy permits all category rows to be managed, subject to grants.
 
 ## File Map
 
@@ -32,7 +32,7 @@ Each expense has:
 
 ## First-Time Setup
 
-If the user wants to set up ForCouples (says "set me up" or similar), read `SETUP.md` and follow its instructions to walk the user through the full onboarding flow.
+If asked to set up ForCouples, read the limits in `README.md` and `SETUP.md` first. Explain that this is an experiment and developer MCP does not enforce partner privacy. Start with synthetic data in an isolated project. Do not invite partners as developers to provide private access.
 
 ## Daily Use
 
@@ -53,7 +53,7 @@ name: monthly-food
 description: Monthly food spending breakdown
 allowed-tools: mcp__supabase__execute_sql
 ---
-Query food expenses for the current month grouped by week, display as a table.
+Query only the intended visible expenses for the configured pair, with the creator/type predicate in SKILL.md; group food expenses for the current month by week. These filters are not authorization.
 ```
 
 See `examples/cost-analysis.sql` for SQL patterns to build on.
@@ -69,6 +69,6 @@ When working on this repo:
 - `SETUP.md` is the user-facing onboarding flow — changes here affect how new users get started
 - `skills/forcouples/SKILL.md` is the daily-use skill — keep it under 500 lines
 - `setup.sql` is the schema — changes require migration planning for existing users
-- Test changes against a real Supabase project before submitting
+- For schema or runtime changes, test in an isolated Supabase project with synthetic data. Documentation and query-example corrections can use static checks; report that live execution was not tested.
 
 If you encounter outdated instructions or setup issues, PRs to fix them are welcome.

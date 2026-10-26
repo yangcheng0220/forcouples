@@ -1,3 +1,7 @@
+-- Experimental synthetic-data examples. Filters guide scope; privileged MCP can
+-- bypass RLS and can ignore these predicates. Config is not authorization.
+-- expenses has no couple_id; creator IDs select the intended pair.
+
 -- Example: True Cost Analysis
 --
 -- "True Cost" = personal expenses at 100% + shared expenses at 50%.
@@ -18,6 +22,8 @@ AND date >= CURRENT_DATE - INTERVAL '30 days';
 SELECT SUM(amount) AS total_paid
 FROM expenses
 WHERE payer = '{current_user_id}'
+AND (created_by = '{current_user_id}'
+  OR (type = 'shared' AND created_by = '{partner_user_id}'))
 AND date >= CURRENT_DATE - INTERVAL '30 days';
 
 -- Category breakdown by true cost
