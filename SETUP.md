@@ -1,6 +1,14 @@
 # ForCouples — Setup
 
-Interactive onboarding flow. An AI agent reads this and walks the user through each step.
+Setup flow for an experimental agent-driven expense tool. Developer MCP does not enforce partner privacy; this is not a secure multi-user setup guide.
+
+## Read Before Setup
+
+Read the [privacy limits](README.md#privacy-limits) first. Start with synthetic data in an isolated test project before deciding whether the access model fits your use.
+
+Supabase MCP uses developer permissions, not the identity in `config.json`. Privileged SQL bypasses ordinary RLS guarantees. Creating Auth users and changing config does not restrict that SQL to either partner. Skill filters are workflow instructions, not enforceable partner privacy. Project scoping limits projects, not rows. Categories are global and all authenticated users can manage them, subject to grants.
+
+The steps below let you explore the workflow. They do not establish a safe production deployment.
 
 **Action markers:**
 - **[USER]** — user acts in a browser or UI. Agent explains what to do and waits.
@@ -49,7 +57,7 @@ On that page, the user should:
 
 The page generates the exact MCP server URL and shows tool-specific setup steps — no need to manually construct URLs or edit config files.
 
-After install, the tool will prompt a browser window for OAuth login to Supabase. This is the only authentication needed — no API keys or tokens to manage.
+After install, the tool will prompt a browser window for OAuth login to Supabase. This authenticates developer access. It does not establish an expense-user session. The MCP client manages OAuth credentials; do not commit them.
 
 **Note:** Some tools require a session restart after MCP install for the connection to become available. If the verification query below fails, ask the user to restart their session and resume setup.
 
@@ -73,7 +81,7 @@ WHERE table_schema = 'public' AND table_name IN ('profiles', 'couples', 'categor
 ORDER BY table_name;
 ```
 
-If all four tables exist, skip to Step 4. Otherwise, read `setup.sql` from this repo and execute it via the Supabase MCP `execute_sql` tool. The script is idempotent — safe to run on an existing database.
+If all four tables exist, skip to Step 4. Otherwise, read `setup.sql` from this repo and execute it via the Supabase MCP `execute_sql` tool. The script uses conditional creation and replaces named policies, but is not a migration or a guarantee of compatibility with an existing database. Use a fresh isolated test project; do not run it against an existing deployment.
 
 Verify all tables were created:
 
@@ -89,17 +97,17 @@ All four tables must be present. If any are missing, re-run `setup.sql`.
 
 ## Step 4: Create User Accounts [AGENT+USER]
 
-The system tracks who logged each expense and keeps personal expenses private between partners. This requires two user accounts in Supabase Auth.
+The schema uses two Supabase Auth accounts to attribute sample records and express intended visibility for authenticated application requests. They do not restrict developer MCP access.
 
-Explain to the user: "I need to set up accounts for you and your partner so the system can track who logged each expense. Each person's personal expenses stay private — only shared expenses are visible to both."
+Use test accounts and synthetic identities only. Explain that developer MCP can read either account's records regardless of their personal/shared label.
 
-Check for existing users:
+For known test account IDs, check only those accounts. If the IDs are not known, have the user identify their synthetic accounts in the dashboard first:
 
 ```sql
-SELECT id, email FROM auth.users ORDER BY created_at;
+SELECT id FROM auth.users WHERE id IN ('<TEST_USER_A_ID>', '<TEST_USER_B_ID>');
 ```
 
-**If two users exist:** Display them and ask which two form the couple.
+**If test users exist:** Ask which two test accounts form the sample couple. Do not display unrelated account details.
 
 **If fewer than two:** The user must create accounts in the Supabase dashboard:
 1. Go to Authentication > Users > Add user
@@ -160,7 +168,7 @@ Use the tool's native skill directory structure — the agent knows where skills
 
 Ask which of the two users is "me" (the one setting this up now).
 
-Explain: "Each partner gets their own config. This determines which expenses you see — your own personal expenses plus all shared expenses. Your partner's personal expenses stay private."
+Explain: "Config selects the identities used in example filters. It does not authenticate an expense user or restrict developer MCP access. Changing or ignoring it can expose other records."
 
 Write `config.json` next to the installed SKILL.md:
 
@@ -180,16 +188,14 @@ Write `config.json` next to the installed SKILL.md:
 
 ## Step 10: Verify [AGENT]
 
-Test the installed skill by logging a sample expense. Ask the user to describe something they bought recently, then run through the log flow.
+Test the installed skill with a fictional purchase and synthetic identities only. This verifies the workflow, not authorization or partner privacy.
 
 If it works, setup is complete. The cloned repo is no longer needed — the skill and config are installed in the user's environment. The user can delete the cloned folder.
 
 ---
 
-## Partner Setup
+## Partner Access — Developer Permissions
 
-The first user invites their partner to the Supabase organization as a Developer (Organization Settings > Members > Invite). See: https://supabase.com/docs/guides/platform/access-control
+Inviting a partner to the Supabase organization as a Developer grants developer access. A separate MCP connection and config do not isolate personal expenses. Separate OAuth logins do not turn developer SQL into requests governed by each expense user's RLS policies.
 
-After accepting the invite, the partner clones this repo, opens it in their AI coding tool, and says "set me up." The tool reads AGENTS.md, finds the setup instructions, and walks the partner through the same flow. It detects existing tables, profiles, and couple — and skips to MCP setup, skill install, and config generation.
-
-No credentials are exchanged between partners. Each person authenticates via their own Supabase OAuth login.
+Do not use a developer invitation as private partner access. A multi-user replacement needs a restricted authenticated interface and tested authorization rules before any real data is added. See [Supabase access control](https://supabase.com/docs/guides/platform/access-control) and [MCP security guidance](https://supabase.com/docs/guides/ai-tools/mcp#security-risks).

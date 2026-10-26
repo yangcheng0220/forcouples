@@ -83,9 +83,11 @@ CREATE TRIGGER expenses_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- Row Level Security
--- RLS protects the app (authenticated client). The Supabase MCP uses
--- a service role that bypasses RLS — privacy there is enforced by the
--- skill's WHERE clauses (see SKILL.md Data Visibility section).
+-- These policies express intended access for authenticated application requests.
+-- Privileged developer MCP SQL bypasses ordinary RLS guarantees. Skill WHERE
+-- clauses are editable workflow instructions and do not enforce partner privacy.
+-- Categories below are global and manageable by all authenticated users,
+-- subject to grants; there is no per-user or per-couple category ownership.
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE couples ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
